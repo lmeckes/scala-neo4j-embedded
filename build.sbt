@@ -1,7 +1,9 @@
 lazy val commonSettings = Seq(
   organization := "com.lms",
   version := "0.1.0",
-  scalaVersion := "2.11.7"
+  scalaVersion := "2.11.7",
+  scalaVersion in ThisBuild := "2.11.7",
+  ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 )
 
 lazy val root = (project in file(".")).
