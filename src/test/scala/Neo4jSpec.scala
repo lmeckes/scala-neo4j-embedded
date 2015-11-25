@@ -47,7 +47,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
       type RelTypes = Value
       val KNOWS = Value
 
-      implicit def conv(rt: RelTypes) : RelationshipType = new RelationshipType() {
+      implicit def conv(rt: RelTypes): RelationshipType = new RelationshipType() {
         def name = rt.toString
       }
     }
@@ -81,7 +81,8 @@ class Neo4jSpec extends FlatSpec with Matchers {
       }
     }
 
-    val text = """ Le petit juge blond est ivre """.toLowerCase
+    val extendedCode : (Char) => Boolean = (c:Char) => (c <= 32 || c >= 127)
+    val text = scala.io.Source.fromFile("src/test/resources/testInput.txt").mkString.filterNot(extendedCode).toLowerCase
 
     var tx: Transaction = null
     var ucnf: UniqueNodeFactory = null
@@ -93,7 +94,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
 
       ucnf = new UniqueFactory.UniqueNodeFactory(graphDb, "chars") {
         override def initialize(n: Node, prop: util.Map[String, AnyRef]): Unit = {
-          n.addLabel(DynamicLabel.label("char"))
+          n.addLabel(DynamicLabel.label("Node"))
           n.setProperty("char", prop.get("char"))
         }
       }
@@ -123,13 +124,22 @@ class Neo4jSpec extends FlatSpec with Matchers {
         .depthFirst()
         .relationships(RelTypes.NEIGHBOR)
         .uniqueness(Uniqueness.NODE_GLOBAL)
+
       val randomStartNode = ucnf.getOrCreate("char", text(Random.nextInt(text.length)))
-      neighborTraversal.traverse(randomStartNode).nodes().toList.foreach(
+
+      val traversed = neighborTraversal.traverse(randomStartNode).nodes()
+
+      println(s"traversed: $traversed")
+
+      traversed.toList.sortWith(_.getDegree < _.getDegree).foreach(
         n => {
           val char = n.getProperty("char")
           val degree = n.getDegree.toString
-          val rls = n.getRelationships(RelTypes.NEIGHBOR).size
-          println(s"$char: degree=$degree relsize=$rls")
+          val rls = n.getRelationships(RelTypes.NEIGHBOR)
+            .map(_.getEndNode)
+            .map(_.getProperty("char"))
+            .toSet.mkString("[", ",", "]")
+          println(s"'$char': degree=$degree rel=$rls")
         }
       )
       tx.success()

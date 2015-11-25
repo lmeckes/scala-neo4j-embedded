@@ -1,0 +1,45 @@
+Bonjour Sylvain, tu es directeur de projets R&D chez Blueway Software, avant tu as travaillé sur différents postes informatiques, à la fois développeur, consultant, formateur, et tu t'es pris de passion en 2012 pour Neo4j. Peux-tu nous raconter comment tu as découvert cette technologie et surtout pourquoi tu l'as adoptée ?
+Tout est né de l'Europe ! À une certaine époque, je travaillais pour une société s'occupant du management de projets scientifiques européens. Je devais fournir un outil de communication pour tous les acteurs d'un projet via une plate-forme web, mais tous les projets ne se ressemblent pas !
+Pour gérer les données, il fallait quasiment faire une nouvelle base de données par type de projet. C'est à ce moment qu'est né mon mini-projet Link, une espèce de métamodèle permettant d'avoir un modèle unique pouvant décrire plusieurs modèles. Le projet a pris de l'ampleur et a été rebaptisé ESS (Europa Server System) et est devenu mon principal système de stockage de données. Il pouvait gérer de manière dynamique des entités polymorphes et composites, et également les relations, en se basant sur un système d'agrégation et de composition. Bref, c'était presque parfait, mais interroger le système était très lourd, de longues requêtes SQL avec des jointures par dizaines pour des choses très simples. Et effectivement, fin 2011 je découvre Neo4j alors que je m'entêtais à trouver des outils plus souples pour remettre en place un système tel que ESS. Je l'ai étudié. Son côté très simple à prendre en main m'a permis de constater immédiatement que j'avais trouvé ce que je cherchais.
+
+Quels sont les autres SGDB que tu connais ? Tu continues à les utiliser ?
+Les bases relationnelles of course ! Mais ça m'ennuie le plus souvent. Les modifications de modèles sont pesantes surtout lorsqu'il s'agit de modifier des cardinalités.
+Vous avez beau utiliser les méthodes les plus agiles du monde, si votre modèle ne suit pas... Il y a quelques années, j'ai également utilisé XIndice une base de données XML et puis plus récemment j'ai regardé un peu CouchBase, MongoDB et OrientDB. Mais j'avoue ne pas avoir été très loin avec ces dernières.
+
+Dans la préface de ton livre, Philip Rathle évoque une nouvelle façon de penser avec Neo4j : qu'en dirais-tu ?
+C'est ça ! Je suis dans cette pensée de dynamisme et de connexion depuis pas mal d'années en fait. Aujourd'hui il suffit de regarder autour de soi pour voir à quel point le monde est connecté. Et comme il évolue vite, il faut des outils adaptés pour répondre tout aussi vite à cette évolution. Neo4j est une réponse.
+ 
+ "Il faut des outils adaptés
+pour répondre à l'évolution du monde"
+ 
+Non seulement tu utilises Neo4j, mais tu contribues aujourd'hui grandement à le promouvoir en France. Qu'est-ce qui t'a poussé à créer le Meetup de Lyon ?
+Cédric Fauvet m'avait demandé de monter un Meetup à Lyon mais j'avais tout d'abord refusé, pensant que ce serait lourd à gérer. Et puis finalement j'ai accepté, j'avais commencé l'écriture du livre, je me sentais plus sûr vis à vis de la technologie, je me suis dit que ça serait bien d'échanger sur nos expériences directement avec d'autres personnes.
+
+Comment ça se passe un meetup ? Peut-on en profiter même si on est complètement débutant ?
+Ça se veut décontracté, on a tous fait notre journée de travail, il ne faut pas que ça devienne une extension de cette journée. Donc on commence par accueillir les participants autour d'un petit apéritif avant de commencer la soirée qui se déroule en deux temps.
+On commence par rappeler ce qu'est Neo4j puis un speaker intervient pour une quarantaine de minutes environ autour d'un sujet en particulier. Le sujet peut être technique, ou pas. On termine par discuter autour de pizzas, c'est un moment que j'apprécie beaucoup.
+D'ailleurs, nous sommes toujours à la recherche d'éventuels speakers, il ne faut pas hésiter à me contacter.
+
+Tu signes aujourd'hui un premier livre sur Neo4j. Qu'est-ce que tu as cherché à transmettre à travers ce livre ? Quels étaient tes objectifs ?
+Tout d'abord apporter une documentation francophone. Il serait fort dommage, si le projet est adapté, que le choix de Neo4j soit rejeté par méconnaissance du produit. Nous avons, en France, des informaticiens de talent peu à l'aise avec l'anglais, ne les oublions pas.
+Ensuite, je voulais partir du lecteur qui ne connaît pas Neo4j et, au cours des chapitres, lui faire gravir un à un les échelons techniques. C'est le sens naturel de la prise en main d'une technologie.
+ 
+"Je voulais partir du lecteur qui ne connaît pas Neo4j
+et lui faire gravir un à un les échelons techniques"
+ 
+J'entendais également autour de moi beaucoup de discours confus à propos du NoSQL, j'ai tenté d'éclaircir ces aspects sans entrer dans la technique.
+Enfin c'est également un moyen de faire le point sur son métier, de réfléchir sur ce qu'on en a compris et d'expliquer pourquoi on en vient à utiliser ce type de technologie.
+
+À qui s'adresse précisément le livre ? Quels sont les prérequis ?
+Ce livre s'adresse à différentes personnes. Aux directeurs de services informatiques, par exemple, qui souhaitent comprendre ce qu'est Neo4j en quelques pages sans avoir à entrer dans la technique, mais tout autant aux informaticiens plus techniques qui souhaitent prendre en main Neo4j sans avoir à parcourir des pages de forums à n'en plus finir.
+Quant aux prérequis, ils sont minimes puisque je réexplique tout ce qu'il y a à savoir (ce que veut dire REST par exemple, jusqu'à l'utilisation basique de cURL !).
+Savoir ce que fait une base de données me semble nécessaire cependant.
+Que conseillerais-tu au responsable de projet qui voudrait tester la pertinence de Neo4j au regard de ses besoins ?
+Qu'il ne faut pas se laisser aller à l'habitude prise avec les modèles relationnels classiques, qui consiste à vouloir tout verrouiller et reproduire au final un schéma tel que pensé pour un SGBDR.
+On entre les données, et ensuite on les reconnaît en fonction d'un modèle (et grâce au pattern matching de Neo4j) prévu pour la circonstance. C'est ce qui rend cette technologie si dynamique.
+
+Pour ta part, quel type d'application as-tu développé avec Neo4j ? Et quels sont tes projets futurs ?
+J'ai développé, entre autres, une application de gestion de processus à tâches humaines. Chez Ixxo Web Mining, nous l'évaluons également pour établir un graphe de Crawl (parcours du Web profond), et nous envisageons de gérer du partage de données entre les utilisateurs de la plate-forme au travers d'un graphe, ce qui est plutôt naturel en fait.
+
+Merci Sylvain pour avoir répondu à mes questions. Souhaites-tu ajouter quelque chose ?
+J'espère que le livre recevra un bon accueil et qu'il saura allumer dans l’œil de certains la petite flamme qui fait de nous des passionnés de l'informatique.
