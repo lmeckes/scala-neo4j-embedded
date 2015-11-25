@@ -8,7 +8,8 @@ import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory
 import org.neo4j.graphdb.traversal.Uniqueness
 import org.scalatest._
 import scala.collection.JavaConversions._
-import scala.util.{Try, Random}
+import scala.collection.mutable
+import scala.util.{Failure, Success, Try, Random}
 import scalax.file.Path
 
 object DbServer {
@@ -98,20 +99,20 @@ class Neo4jSpec extends FlatSpec with Matchers {
     try {
       tx = graphDb.beginTx
 
-      ucnf = new UniqueFactory.UniqueNodeFactory(graphDb, "chars") {
+      ucnf = new UniqueFactory.UniqueNodeFactory(graphDb, "words") {
         override def initialize(n: Node, prop: util.Map[String, AnyRef]): Unit = {
-          n.addLabel(DynamicLabel.label("Node"))
-          n.setProperty("char", prop.get("char"))
+          n.addLabel(DynamicLabel.label("Word Node"))
+          n.setProperty("word", prop.get("word"))
         }
       }
 
       // Map Unique Char Nodes from input text
       text.zipWithIndex.foreach(
         c => {
-          val ucn = ucnf.getOrCreate("char", c._1)
+          val ucn = ucnf.getOrCreate("word", c._1)
           val next = c._2 + 1
           if (text.length > next) {
-            val neighbor = ucnf.getOrCreate("char", text(next))
+            val neighbor = ucnf.getOrCreate("word", text(next))
             ucn.createRelationshipTo(neighbor, RelTypes.NEIGHBOR)
             neighbor.createRelationshipTo(ucn, RelTypes.NEIGHBOR)
           }
@@ -133,20 +134,21 @@ class Neo4jSpec extends FlatSpec with Matchers {
         .relationships(RelTypes.NEIGHBOR)
         .uniqueness(Uniqueness.NODE_GLOBAL)
 
-      val randomStartNode = ucnf.getOrCreate("char", text(Random.nextInt(text.length)))
+      val randomStartNode = ucnf.getOrCreate("word", text(Random.nextInt(text.length)))
 
       val traversed = neighborTraversal.traverse(randomStartNode).nodes()
 
       traversed.toList.sortWith(_.getDegree > _.getDegree).foreach(
         n => {
-          val char = n.getProperty("char")
+          val word = n.getProperty("word")
           val rls = n.getRelationships(Direction.BOTH, RelTypes.NEIGHBOR)
-            .map(_.getEndNode)
-            .map(_.getProperty("char"))
-            .toSet
-            .filter(_ != char)
-            .mkString("[", ",", "]")
-          println(s"'$char': rel=$rls")
+            .map(_.getEndNode.getProperty("word").toString)
+            .filter(_ != word)
+            .groupBy(_.toString)
+            .map(m => "(" + m._2.size + ")" + m._2.head.toString).toList
+            .sortWith(_.toString > _.toString)
+            .mkString(",")
+          println(s"'$word': rel=$rls")
         }
       )
       
