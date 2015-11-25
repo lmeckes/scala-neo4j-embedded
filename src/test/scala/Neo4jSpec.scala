@@ -8,7 +8,6 @@ import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory
 import org.neo4j.graphdb.traversal.Uniqueness
 import org.scalatest._
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.util.{Try, Random}
 import scalax.file.Path
 
@@ -95,7 +94,6 @@ class Neo4jSpec extends FlatSpec with Matchers {
     var tx: Transaction = null
     var ucnf: UniqueNodeFactory = null
 
-    /** **************************/
     /** CREATE GRAPH FROM TEXT **/
     try {
       tx = graphDb.beginTx
@@ -126,7 +124,6 @@ class Neo4jSpec extends FlatSpec with Matchers {
       tx.close()
     }
 
-    /** **************************/
     /** TRAVERSE GRAPH **/
     try {
       tx = graphDb.beginTx
