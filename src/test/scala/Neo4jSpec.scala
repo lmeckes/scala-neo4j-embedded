@@ -136,7 +136,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
 
       val randomStartNode = ucnf.getOrCreate("word", text(Random.nextInt(text.length)))
 
-      val traversed = neighborTraversal.traverse(randomStartNode).nodes()
+      val traversed = neighborTraversal.traverse(randomStartNode).nodes
 
       traversed.toList.sortWith(_.getDegree > _.getDegree).foreach(
         n => {
@@ -145,13 +145,20 @@ class Neo4jSpec extends FlatSpec with Matchers {
             .map(_.getEndNode.getProperty("word").toString)
             .filter(_ != word)
             .groupBy(_.toString)
-            .map(m => "(" + m._2.size + ")" + m._2.head.toString).toList
+            .map(m => {
+              val count = m._2.size
+              val word = m._2.head
+              if (count > 1)
+                s"$word($count)"
+              else
+                word
+            }).toList
             .sortWith(_.toString > _.toString)
             .mkString(",")
-          println(s"'$word': rel=$rls")
+          println(s"'$word': $rls")
         }
       )
-      
+
       tx.success()
     } finally {
       tx.close()
