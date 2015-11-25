@@ -8,8 +8,7 @@ import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory
 import org.neo4j.graphdb.traversal.Uniqueness
 import org.scalatest._
 import scala.collection.JavaConversions._
-import scala.collection.mutable
-import scala.util.{Failure, Success, Try, Random}
+import scala.util.{Try, Random}
 import scalax.file.Path
 
 object DbServer {
