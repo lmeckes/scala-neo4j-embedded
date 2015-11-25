@@ -8,6 +8,7 @@ import org.neo4j.graphdb.index.UniqueFactory.UniqueNodeFactory
 import org.neo4j.graphdb.traversal.Uniqueness
 import org.scalatest._
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.{Try, Random}
 import scalax.file.Path
 
@@ -15,8 +16,11 @@ object DbServer {
   def runDb: GraphDatabaseService = {
     val neoStore: Path = Path.fromString("src/test/neostore")
     Try(neoStore.deleteRecursively(continueOnFailure = true))
-    neoStore.createDirectory()
-    new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(neoStore.fileOption.getOrElse(new File("/tmp/neostore"))).newGraphDatabase
+    Try(neoStore.createDirectory())
+
+    new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(
+      neoStore.fileOption.getOrElse(new File("/tmp/neostore")))
+      .newGraphDatabase
   }
 }
 
@@ -86,8 +90,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
       .replaceAll("\\p{Punct}+", " ")
       .replaceAll("\\s+", "+")
       .toLowerCase
-
-    val inputText = text.split("\\+")
+      .split("\\+")
 
     var tx: Transaction = null
     var ucnf: UniqueNodeFactory = null
@@ -105,12 +108,15 @@ class Neo4jSpec extends FlatSpec with Matchers {
       }
 
       // Map Unique Char Nodes from input text
-      inputText.zipWithIndex.foreach(
+      text.zipWithIndex.foreach(
         c => {
           val ucn = ucnf.getOrCreate("char", c._1)
           val next = c._2 + 1
-          if (inputText.length > next)
-            ucn.createRelationshipTo(ucnf.getOrCreate("char", inputText(next)), RelTypes.NEIGHBOR)
+          if (text.length > next) {
+            val neighbor = ucnf.getOrCreate("char", text(next))
+            ucn.createRelationshipTo(neighbor, RelTypes.NEIGHBOR)
+            neighbor.createRelationshipTo(ucn, RelTypes.NEIGHBOR)
+          }
         }
       )
 
@@ -130,7 +136,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
         .relationships(RelTypes.NEIGHBOR)
         .uniqueness(Uniqueness.NODE_GLOBAL)
 
-      val randomStartNode = ucnf.getOrCreate("char", inputText(Random.nextInt(inputText.length)))
+      val randomStartNode = ucnf.getOrCreate("char", text(Random.nextInt(text.length)))
 
       val traversed = neighborTraversal.traverse(randomStartNode).nodes()
 
@@ -140,7 +146,9 @@ class Neo4jSpec extends FlatSpec with Matchers {
           val rls = n.getRelationships(Direction.BOTH, RelTypes.NEIGHBOR)
             .map(_.getEndNode)
             .map(_.getProperty("char"))
-            .toSet.mkString("[", ",", "]")
+            .toSet
+            .filter(_ != char)
+            .mkString("[", ",", "]")
           println(s"'$char': rel=$rls")
         }
       )
