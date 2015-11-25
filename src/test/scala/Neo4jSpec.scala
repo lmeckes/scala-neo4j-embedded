@@ -149,8 +149,8 @@ class Neo4jSpec extends FlatSpec with Matchers {
           println(s"'$char': rel=$rls")
         }
       )
+      
       tx.success()
-
     } finally {
       tx.close()
     }
