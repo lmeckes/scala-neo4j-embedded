@@ -95,7 +95,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
     var tx: Transaction = null
     var ucnf: UniqueNodeFactory = null
 
-    /** CREATE GRAPH FROM TEXT **/
+    /** CREATE GRAPH FROM TEXT (words with their neighbor) **/
     try {
       tx = graphDb.beginTx
 
@@ -106,7 +106,6 @@ class Neo4jSpec extends FlatSpec with Matchers {
         }
       }
 
-      // Map Unique Char Nodes from input text
       text.zipWithIndex.foreach(
         c => {
           val ucn = ucnf.getOrCreate("word", c._1)
@@ -144,7 +143,8 @@ class Neo4jSpec extends FlatSpec with Matchers {
           val rls = n.getRelationships(Direction.BOTH, RelTypes.NEIGHBOR)
             .map(_.getEndNode.getProperty("word").toString)
             .filter(_ != word)
-            .groupBy(_.toString)
+            .groupBy(_.toString).toList
+            .sortWith(_._2.size > _._2.size)
             .map(m => {
               val count = m._2.size
               val word = m._2.head
@@ -152,8 +152,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
                 s"$word($count)"
               else
                 word
-            }).toList
-            .sortWith(_.toString > _.toString)
+            })
             .mkString(",")
           println(s"'$word': $rls")
         }
