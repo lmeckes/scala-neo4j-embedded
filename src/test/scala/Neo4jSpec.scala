@@ -1,6 +1,7 @@
 import java.io.File
 import java.util
 
+import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.graphdb.index.UniqueFactory
 import org.neo4j.graphdb._
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
@@ -50,7 +51,6 @@ class Neo4jSpec extends FlatSpec with Matchers {
     object RelTypes extends Enumeration {
       type RelTypes = Value
       val KNOWS = Value
-
       implicit def conv(rt: RelTypes): RelationshipType = new RelationshipType() {
         def name = rt.toString
       }
@@ -79,13 +79,13 @@ class Neo4jSpec extends FlatSpec with Matchers {
     object RelTypes extends Enumeration {
       type RelTypes = Value
       val NEIGHBOR = Value
-
       implicit def conv(rt: RelTypes) = new RelationshipType() {
         def name = rt.toString
       }
     }
 
-    val text = scala.io.Source.fromFile("src/test/resources/testInput.txt").mkString
+    val text = scala.io.Source.fromFile("src/test/resources/testInput.txt")
+      .mkString
       .replaceAll("\\p{Punct}+", " ")
       .replaceAll("\\s+", "+")
       .toLowerCase
@@ -100,7 +100,7 @@ class Neo4jSpec extends FlatSpec with Matchers {
 
       ucnf = new UniqueFactory.UniqueNodeFactory(graphDb, "words") {
         override def initialize(n: Node, prop: util.Map[String, AnyRef]): Unit = {
-          n.addLabel(DynamicLabel.label("Word Node"))
+          n.addLabel(DynamicLabel.label("WordNode"))
           n.setProperty("word", prop.get("word"))
         }
       }
@@ -111,8 +111,11 @@ class Neo4jSpec extends FlatSpec with Matchers {
           val next = c._2 + 1
           if (text.length > next) {
             val neighbor = ucnf.getOrCreate("word", text(next))
-            ucn.createRelationshipTo(neighbor, RelTypes.NEIGHBOR)
-            neighbor.createRelationshipTo(ucn, RelTypes.NEIGHBOR)
+            val rel = Try(neighbor.getRelationships
+                        .filter(_.getNodes.map(_.getProperty("word"))
+                        .toList.contains(c._1)).head)
+              .getOrElse(ucn.createRelationshipTo(neighbor, RelTypes.NEIGHBOR))
+            rel.setProperty("count", Try(rel.getProperty("count")).getOrElse(0).asInstanceOf[Int] + 1)
           }
         }
       )
@@ -140,22 +143,27 @@ class Neo4jSpec extends FlatSpec with Matchers {
         n => {
           val word = n.getProperty("word")
           val rls = n.getRelationships(Direction.BOTH, RelTypes.NEIGHBOR)
-            .map(_.getEndNode.getProperty("word").toString)
-            .filter(_ != word)
-            .groupBy(_.toString).toList
-            .sortWith(_._2.size > _._2.size)
-            .map(m => {
-              val count = m._2.size
-              val word = m._2.head
-              if (count > 1)
-                s"$word($count)"
-              else
-                word
-            })
+            .toList
+            .map(r => Seq(r.getEndNode.getProperty("word"),r.getProperty("count")))
+            .filterNot(_(0) == word)
+            .sortWith((x, y) => x(1).asInstanceOf[Int] > y(1).asInstanceOf[Int])
             .mkString(",")
           println(s"'$word': $rls")
         }
       )
+
+      val execEngine = new ExecutionEngine(graphDb);
+      val execResult = execEngine.execute(
+        s"""
+          match (p:WordNode{word:\"neo4j\"})<-[r:NEIGHBOR*..2]->(c:WordNode)
+          return
+          p.word,
+          reduce(totalCount = 0, n IN r | totalCount + n.count) AS tc,
+          c.word
+          ORDER BY tc DESC
+        """
+      );
+      print(execResult.dumpToString())
 
       tx.success()
     } finally {
