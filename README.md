@@ -1,5 +1,5 @@
 # neo4s
-Scala + Neo4j Bootstrap
+Scala + Neo4j Seed
 
 to launch, 
 - clone git project
