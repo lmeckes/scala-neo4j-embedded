@@ -1,4 +1,4 @@
-name := """scala-neo4j"""
+name := """scala-neo4j-embedded"""
 
 version := "0.1.0"
 
